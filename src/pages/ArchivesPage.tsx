@@ -62,59 +62,59 @@ export function ArchivesPage() {
             className="w-full max-w-lg pl-10 bg-zinc-900 border-zinc-700 focus:ring-indigo-500"
           />
         </div>
-        <Card className="flex-grow flex flex-col bg-zinc-900/50 border-zinc-800 backdrop-blur-sm">
-          <CardContent className="p-0 flex-grow">
-            <ScrollArea className="h-full max-h-[calc(100vh-300px)]">
-              {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-                  {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
-                </div>
-              ) : filteredSessions.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-                  {filteredSessions.map(session => (
-                    <Card key={session.id} className="bg-zinc-900 border-zinc-800 hover:border-indigo-500/50 transition-all group">
-                      <CardHeader>
-                        <CardTitle className="text-base font-semibold text-zinc-200 truncate group-hover:text-white cursor-pointer" onClick={() => navigate(`/session/${session.id}`)}>
-                          {session.title}
-                        </CardTitle>
-                        <CardDescription className="text-xs text-zinc-500">
-                          Last active: {formatDistanceToNow(new Date(session.lastActive), { addSuffix: true })}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="flex justify-end">
-                        <AlertDialog>
+        <AlertDialog>
+          <Card className="flex-grow flex flex-col bg-zinc-900/50 border-zinc-800 backdrop-blur-sm">
+            <CardContent className="p-0 flex-grow">
+              <ScrollArea className="h-full max-h-[calc(100vh-300px)]">
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+                    {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
+                  </div>
+                ) : filteredSessions.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+                    {filteredSessions.map(session => (
+                      <Card key={session.id} className="bg-zinc-900 border-zinc-800 hover:border-indigo-500/50 transition-all group">
+                        <CardHeader>
+                          <CardTitle className="text-base font-semibold text-zinc-200 truncate group-hover:text-white cursor-pointer" onClick={() => navigate(`/session/${session.id}`)}>
+                            {session.title}
+                          </CardTitle>
+                          <CardDescription className="text-xs text-zinc-500">
+                            Last active: {formatDistanceToNow(new Date(session.lastActive), { addSuffix: true })}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex justify-end">
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-zinc-500 hover:text-red-500 hover:bg-red-500/10" onClick={() => setSessionToDelete(session.id)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                        </AlertDialog>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-20 text-zinc-500 flex flex-col items-center">
-                  <Bot className="h-12 w-12 mb-4" />
-                  <h3 className="text-lg font-semibold">No Missions Found</h3>
-                  <p>Your search returned no results, or no missions have been started.</p>
-                </div>
-              )}
-            </ScrollArea>
-          </CardContent>
-        </Card>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the mission archive.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setSessionToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteSession} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-20 text-zinc-500 flex flex-col items-center">
+                    <Bot className="h-12 w-12 mb-4" />
+                    <h3 className="text-lg font-semibold">No Missions Found</h3>
+                    <p>Your search returned no results, or no missions have been started.</p>
+                  </div>
+                )}
+              </ScrollArea>
+            </CardContent>
+          </Card>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the mission archive.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setSessionToDelete(null)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteSession} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
