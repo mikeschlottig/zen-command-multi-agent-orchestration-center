@@ -16,7 +16,7 @@ export class ChatAgent extends Agent<Env, ChatState> {
     messages: [],
     sessionId: crypto.randomUUID(),
     isProcessing: false,
-    model: 'openai/gpt-4o' // Updated default model
+    model: 'anthropic/claude-4-sonnet' // Updated default model
   };
   /**
    * Initialize chat handler when agent starts
