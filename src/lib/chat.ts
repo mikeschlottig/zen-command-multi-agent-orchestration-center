@@ -10,6 +10,10 @@ export const MODELS = [
   { id: 'google-ai-studio/gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
   { id: 'google-ai-studio/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
   { id: 'xai/grok-2', name: 'Grok-2' },
+  // Anthropic Claude models
+  { id: 'anthropic/claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (latest)' },
+  { id: 'anthropic/claude-3-opus-20240229', name: 'Claude 3 Opus' },
+  { id: 'anthropic/claude-3-haiku-20240307', name: 'Claude 3 Haiku' },
 ];
 class ChatService {
   private sessionId: string;

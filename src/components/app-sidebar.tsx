@@ -32,7 +32,7 @@ export function AppSidebar(): JSX.Element {
     return location.pathname.startsWith(path);
   };
   return (
-    <Sidebar collapsible="mobile">
+    <Sidebar collapsible="icon">
       <SidebarHeader>
         <Link to="/" className="flex items-center gap-2.5 px-2 py-1 transition-colors hover:text-indigo-400">
           <BrainCircuit className="h-7 w-7 text-indigo-500" />
