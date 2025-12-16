@@ -1,73 +1,66 @@
-/* This is a demo sidebar. **COMPULSORY** Edit this file to customize the sidebar OR remove it from appLayout OR don't use appLayout at all */
 import React from "react";
-import { Home, Layers, Compass, Star, Settings, LifeBuoy } from "lucide-react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Home, BotMessageSquare, Settings, PlusCircle, HardDrive, BrainCircuit } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
   SidebarHeader,
-  SidebarSeparator,
-  SidebarInput,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuAction,
-  SidebarMenuBadge,
 } from "@/components/ui/sidebar";
-
+import { Button } from "@/components/ui/button";
+import { chatService } from "@/lib/chat";
+import { toast } from "sonner";
 export function AppSidebar(): JSX.Element {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const handleNewMission = async () => {
+    const newSessionId = crypto.randomUUID();
+    const result = await chatService.createSession(undefined, newSessionId);
+    if (result.success && result.data) {
+      navigate(`/session/${result.data.sessionId}`);
+      toast.success("New mission initiated.");
+    } else {
+      toast.error("Failed to initiate new mission.", { description: result.error });
+    }
+  };
+  const isActive = (path: string) => location.pathname === path;
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-1">
-          <div className="h-6 w-6 rounded-md bg-gradient-to-br from-indigo-500 to-purple-500" />
-          <span className="text-sm font-medium">Demo Sidebar</span>
-        </div>
-        <SidebarInput placeholder="Search" />
+        <Link to="/" className="flex items-center gap-2.5 px-2 py-1 transition-colors hover:text-indigo-400">
+          <BrainCircuit className="h-7 w-7 text-indigo-500" />
+          <span className="text-lg font-semibold tracking-tight">Zen Command</span>
+        </Link>
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
+      <SidebarContent className="flex flex-col">
+        <div className="flex-grow">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive>
-                <a href="#"><Home /> <span>Home</span></a>
+              <SidebarMenuButton asChild isActive={isActive('/')}>
+                <Link to="/"><Home /> <span>Mission Control</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <a href="#"><Layers /> <span>Projects</span></a>
+              <SidebarMenuButton asChild isActive={isActive('/archives')}>
+                <Link to="#"><HardDrive /> <span>Archives</span></Link>
               </SidebarMenuButton>
-              <SidebarMenuAction>
-                <Star className="size-4" />
-              </SidebarMenuAction>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <a href="#"><Compass /> <span>Explore</span></a>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive('/settings')}>
+                <Link to="#"><Settings /> <span>Settings</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Quick Links</SidebarGroupLabel>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <a href="#"><Star /> <span>Starred</span></a>
-              </SidebarMenuButton>
-              <SidebarMenuBadge>5</SidebarMenuBadge>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
+        </div>
+        <div className="p-4">
+          <Button onClick={handleNewMission} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            New Mission
+          </Button>
+        </div>
       </SidebarContent>
-      <SidebarFooter>
-        <div className="px-2 text-xs text-muted-foreground">A simple shadcn sidebar</div>
-      </SidebarFooter>
     </Sidebar>
   );
 }

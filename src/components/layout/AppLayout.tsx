@@ -1,31 +1,26 @@
-/*
-Wraps children in a sidebar layout. Don't use this if you don't need a sidebar
-*/
 import React from "react";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { Outlet } from "react-router-dom";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
-
-type AppLayoutProps = {
-  children: React.ReactNode;
-  container?: boolean;
-  className?: string;
-  contentClassName?: string;
-};
-
-export function AppLayout({ children, container = false, className, contentClassName }: AppLayoutProps): JSX.Element {
+import { Toaster } from "@/components/ui/sonner";
+import { useTheme } from "@/hooks/use-theme";
+export function AppLayout(): JSX.Element {
+  useTheme(); // Initialize and apply theme
   return (
-    <SidebarProvider defaultOpen={false}>
-      <AppSidebar />
-      <SidebarInset className={className}>
-        <div className="absolute left-2 top-2 z-20">
-          <SidebarTrigger />
+    <SidebarProvider>
+      <div className="relative min-h-screen w-full bg-zinc-950 text-zinc-50">
+        {/* Animated Gradient Background */}
+        <div className="absolute inset-0 -z-10 h-full w-full bg-zinc-950 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
+          <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-indigo-600 opacity-20 blur-[100px]"></div>
         </div>
-        {container ? (
-          <div className={"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 lg:py-12" + (contentClassName ? ` ${contentClassName}` : "")}>{children}</div>
-        ) : (
-          children
-        )}
-      </SidebarInset>
+        <AppSidebar />
+        <SidebarInset>
+          <main className="h-screen flex flex-col">
+            <Outlet />
+          </main>
+        </SidebarInset>
+        <Toaster theme="dark" richColors closeButton />
+      </div>
     </SidebarProvider>
   );
 }
