@@ -8,7 +8,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarClose,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,7 @@ import { toast } from "sonner";
 export function AppSidebar(): JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isCollapsed } = useSidebar();
+  const { isOpen, onOpenChange } = useSidebar();
   const handleNewMission = async () => {
     const newSessionId = crypto.randomUUID();
     const result = await chatService.createSession(undefined, newSessionId, "New Mission");
@@ -37,27 +36,32 @@ export function AppSidebar(): JSX.Element {
       <SidebarHeader>
         <Link to="/" className="flex items-center gap-2.5 px-2 py-1 transition-colors hover:text-indigo-400">
           <BrainCircuit className="h-7 w-7 text-indigo-500" />
-          <span className="text-lg font-semibold tracking-tight">Zen Command</span>
+          {!isOpen && <span className="text-lg font-semibold tracking-tight">Zen Command</span>}
         </Link>
-        <SidebarClose className="ml-auto">
-          {isCollapsed ? <PanelRightClose /> : <PanelLeftClose />}
-        </SidebarClose>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="ml-auto"
+          onClick={() => onOpenChange(!isOpen)}
+        >
+          {isOpen ? <PanelRightClose /> : <PanelLeftClose />}
+        </Button>
       </SidebarHeader>
       <SidebarContent className="flex flex-col">
         <div className="flex-grow">
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/')}>
+              <SidebarMenuButton asChild isActive={isActive('/')} className="transition-all hover:shadow-glow hover:text-indigo-300">
                 <Link to="/"><Home /> <span>Mission Control</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/archives')}>
+              <SidebarMenuButton asChild isActive={isActive('/archives')} className="transition-all hover:shadow-glow hover:text-indigo-300">
                 <Link to="/archives"><HardDrive /> <span>Archives</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
              <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive('/settings')}>
+              <SidebarMenuButton asChild isActive={isActive('/settings')} className="transition-all hover:shadow-glow hover:text-indigo-300">
                 <Link to="/settings"><Settings /> <span>Settings</span></Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
