@@ -4,10 +4,13 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { useTheme } from "@/hooks/use-theme";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ThemeToggle } from "../ThemeToggle";
 export function AppLayout(): JSX.Element {
   useTheme(); // Initialize and apply theme
+  const isMobile = useIsMobile();
   return (
-    <SidebarProvider collapsible>
+    <SidebarProvider collapsible={true} defaultOpen={!isMobile}>
       <div className="relative min-h-screen w-full bg-zinc-950 text-zinc-50">
         {/* Animated Gradient Background */}
         <div className="absolute inset-0 -z-10 h-full w-full bg-zinc-950 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
@@ -15,9 +18,14 @@ export function AppLayout(): JSX.Element {
         </div>
         <AppSidebar />
         <SidebarInset>
-          <main className="h-screen flex flex-col">
-            <Outlet />
-          </main>
+          <div className="flex flex-col h-screen">
+            <header className="flex-shrink-0 h-16 flex items-center justify-end px-4 sm:px-6 lg:px-8">
+              <ThemeToggle className="relative top-0 right-0" />
+            </header>
+            <main className="flex-1 overflow-hidden">
+              <Outlet />
+            </main>
+          </div>
         </SidebarInset>
         <Toaster theme="dark" richColors closeButton />
       </div>
