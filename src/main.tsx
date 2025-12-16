@@ -10,6 +10,8 @@ import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import '@/index.css';
 import { HomePage } from '@/pages/HomePage';
 import { SessionPage } from '@/pages/SessionPage';
+import { ArchivesPage } from '@/pages/ArchivesPage';
+import { SettingsPage } from '@/pages/SettingsPage';
 import { AppLayout } from '@/components/layout/AppLayout';
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -24,6 +26,14 @@ const router = createBrowserRouter([
       {
         path: "/session/:sessionId",
         element: <SessionPage />,
+      },
+      {
+        path: "/archives",
+        element: <ArchivesPage />,
+      },
+      {
+        path: "/settings",
+        element: <SettingsPage />,
       },
     ]
   },
