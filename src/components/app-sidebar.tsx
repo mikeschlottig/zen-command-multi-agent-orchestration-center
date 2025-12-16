@@ -16,7 +16,7 @@ import { toast } from "sonner";
 export function AppSidebar(): JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isOpen, onOpenChange } = useSidebar();
+  const { open, setOpen, toggleSidebar } = useSidebar();
   const handleNewMission = async () => {
     const newSessionId = crypto.randomUUID();
     const result = await chatService.createSession(undefined, newSessionId, "New Mission");
@@ -32,19 +32,19 @@ export function AppSidebar(): JSX.Element {
     return location.pathname.startsWith(path);
   };
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon" variant="floating">
       <SidebarHeader>
         <Link to="/" className="flex items-center gap-2.5 px-2 py-1 transition-colors hover:text-indigo-400">
           <BrainCircuit className="h-7 w-7 text-indigo-500" />
-          {!isOpen && <span className="text-lg font-semibold tracking-tight">Zen Command</span>}
+          {open && <span className="text-lg font-semibold tracking-tight">Zen Command</span>}
         </Link>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="ml-auto"
-          onClick={() => onOpenChange(!isOpen)}
-        >
-          {isOpen ? <PanelRightClose /> : <PanelLeftClose />}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto"
+            onClick={toggleSidebar}
+          >
+            {open ? <PanelRightClose /> : <PanelLeftClose />}
         </Button>
       </SidebarHeader>
       <SidebarContent className="flex flex-col">
