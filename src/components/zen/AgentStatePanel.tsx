@@ -3,13 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { ModelSelector } from './ModelSelector';
-import { BrainCircuit, Zap, ShieldCheck } from 'lucide-react';
+import { VisualContextGraph } from './VisualContextGraph';
+import { BrainCircuit, Zap, ShieldCheck, Network } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
+import { motion } from 'framer-motion';
 interface AgentStatePanelProps {
   currentModel: string;
   onModelChange: (modelId: string) => void;
 }
 export function AgentStatePanel({ currentModel, onModelChange }: AgentStatePanelProps) {
+  const confidence = 85;
   return (
     <div className="h-full flex flex-col bg-zinc-900 border-l border-zinc-800">
       <header className="p-4 border-b border-zinc-800">
@@ -34,14 +37,32 @@ export function AgentStatePanel({ currentModel, onModelChange }: AgentStatePanel
           <Card className="bg-zinc-900/50 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2 text-zinc-300">
+                <Network className="w-5 h-5 text-teal-400" />
+                Swarm Topology
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <VisualContextGraph />
+            </CardContent>
+          </Card>
+          <Card className="bg-zinc-900/50 border-zinc-800">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2 text-zinc-300">
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
                 Confidence Level
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-4">
-                <Progress value={85} className="w-full [&>div]:bg-emerald-500" />
-                <span className="font-semibold text-emerald-400">85%</span>
+                <div className="w-full bg-zinc-800 rounded-full h-2.5">
+                  <motion.div
+                    className="bg-emerald-500 h-2.5 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${confidence}%` }}
+                    transition={{ duration: 1, ease: "circOut" }}
+                  />
+                </div>
+                <span className="font-semibold text-emerald-400">{confidence}%</span>
               </div>
               <p className="text-xs text-zinc-500 mt-2">Agent confidence in current solution path.</p>
             </CardContent>
@@ -65,7 +86,8 @@ export function AgentStatePanel({ currentModel, onModelChange }: AgentStatePanel
         </div>
       </ScrollArea>
       <footer className="p-4 border-t border-zinc-800 text-center text-xs text-zinc-600">
-        Zen MCP v1.0
+        <p>AI requests are rate-limited across all user apps.</p>
+        <p className="mt-1">Zen MCP v1.0</p>
       </footer>
     </div>
   );

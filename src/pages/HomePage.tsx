@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Bot, BrainCircuit, Code, ShieldCheck, Users, Zap } from 'lucide-react';
+import { Bot, BrainCircuit, Code, ShieldCheck, Users, Zap, Loader2 } from 'lucide-react';
 import { chatService } from '@/lib/chat';
 import type { SessionInfo } from '../../worker/types';
 import { formatDistanceToNow } from 'date-fns';
@@ -22,14 +22,16 @@ const StatCard = ({ icon, title, value, description }: { icon: React.ReactNode, 
     </CardContent>
   </Card>
 );
-const WorkflowCard = ({ icon, title, description, onClick }: { icon: React.ReactNode, title: string, description: string, onClick: () => void }) => (
+const WorkflowCard = ({ icon, title, description, onClick, isStarting }: { icon: React.ReactNode, title: string, description: string, onClick: () => void, isStarting: boolean }) => (
   <Card
-    onClick={onClick}
+    onClick={!isStarting ? onClick : undefined}
     className="bg-zinc-900/50 border-zinc-800 hover:border-indigo-500/50 hover:bg-zinc-800/60 transition-all cursor-pointer group"
   >
     <CardHeader>
       <div className="flex items-center gap-4">
-        <div className="p-3 rounded-lg bg-zinc-800 group-hover:bg-indigo-600 transition-colors">{icon}</div>
+        <div className="p-3 rounded-lg bg-zinc-800 group-hover:bg-indigo-600 transition-colors">
+          {isStarting ? <Loader2 className="h-6 w-6 text-indigo-400 animate-spin" /> : icon}
+        </div>
         <div>
           <CardTitle className="text-base font-semibold text-zinc-200 group-hover:text-white">{title}</CardTitle>
           <CardDescription className="text-sm text-zinc-400 mt-1">{description}</CardDescription>
@@ -42,6 +44,7 @@ export function HomePage() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [startingMission, setStartingMission] = useState<string | null>(null);
   useEffect(() => {
     const fetchSessions = async () => {
       setLoading(true);
@@ -56,12 +59,15 @@ export function HomePage() {
     fetchSessions();
   }, []);
   const startNewMission = async (title: string, firstMessage: string) => {
-    const result = await chatService.createSession(title, undefined, firstMessage);
+    setStartingMission(title);
+    const result = await chatService.createSession(undefined, undefined, firstMessage);
     if (result.success && result.data) {
+      toast.success(`Mission '${result.data.title}' initiated.`);
       navigate(`/session/${result.data.sessionId}`);
     } else {
-      toast.error("Failed to start new mission.");
+      toast.error("Failed to start new mission.", { description: result.error });
     }
+    setStartingMission(null);
   };
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col">
@@ -84,25 +90,29 @@ export function HomePage() {
                 icon={<Code className="h-6 w-6 text-indigo-400" />}
                 title="Deep Code Review"
                 description="Analyze code with multiple models for quality."
-                onClick={() => startNewMission("Code Review", "Perform a deep code review on the current project.")}
+                onClick={() => startNewMission("Deep Code Review", "Perform a deep code review on the current project.")}
+                isStarting={startingMission === "Deep Code Review"}
               />
               <WorkflowCard
                 icon={<Users className="h-6 w-6 text-emerald-400" />}
                 title="Consensus Debate"
                 description="Let models debate a topic to find the best solution."
-                onClick={() => startNewMission("Consensus Debate", "Start a consensus debate on...")}
+                onClick={() => startNewMission("Consensus Debate", "Start a consensus debate on the best state management library for a new React project.")}
+                isStarting={startingMission === "Consensus Debate"}
               />
               <WorkflowCard
                 icon={<BrainCircuit className="h-6 w-6 text-amber-400" />}
                 title="System Design"
                 description="Plan complex architecture with AI collaborators."
-                onClick={() => startNewMission("System Design", "Design a scalable system for...")}
+                onClick={() => startNewMission("System Design", "Design a scalable system for a real-time chat application.")}
+                isStarting={startingMission === "System Design"}
               />
               <WorkflowCard
                 icon={<ShieldCheck className="h-6 w-6 text-rose-400" />}
                 title="Security Audit"
                 description="Identify potential vulnerabilities in your codebase."
-                onClick={() => startNewMission("Security Audit", "Perform a security audit.")}
+                onClick={() => startNewMission("Security Audit", "Perform a security audit on the authentication module.")}
+                isStarting={startingMission === "Security Audit"}
               />
             </div>
           </div>
@@ -137,8 +147,9 @@ export function HomePage() {
             </Card>
           </div>
         </div>
-        <footer className="text-center text-zinc-600 pt-8 text-sm">
-          Built with ��️ at Cloudflare
+        <footer className="text-center text-zinc-600 pt-8 text-sm space-y-2">
+          <Badge variant="destructive" className="bg-red-500/10 border-red-500/20 text-red-400">AI requests are rate-limited across all user apps.</Badge>
+          <p>Built with ❤️ at Cloudflare</p>
         </footer>
       </div>
     </div>
