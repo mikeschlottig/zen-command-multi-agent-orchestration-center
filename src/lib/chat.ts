@@ -5,15 +5,15 @@ export interface ChatResponse {
   error?: string;
 }
 export const MODELS = [
-  { id: 'openai/gpt-4o', name: 'GPT-4o' },
-  { id: 'openai/o1-preview', name: 'O1 Preview' },
-  { id: 'google-ai-studio/gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
-  { id: 'google-ai-studio/gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-  { id: 'xai/grok-2', name: 'Grok-2' },
-  // Anthropic Claude models
-  { id: 'anthropic/claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet (latest)' },
-  { id: 'anthropic/claude-3-opus-20240229', name: 'Claude 3 Opus' },
-  { id: 'anthropic/claude-3-haiku-20240307', name: 'Claude 3 Haiku' },
+  { id: 'anthropic/claude-4-opus', name: 'Claude 4 Opus (4.5)' },
+  { id: 'anthropic/claude-4-sonnet', name: 'Claude 4 Sonnet (4.5)' },
+  { id: 'anthropic/claude-4-haiku', name: 'Claude 4 Haiku (4-5)' },
+  { id: 'google-ai-studio/gemini-3.0-pro', name: 'Gemini 3.0 Pro' },
+  { id: 'openai/gpt-5-mini', name: 'GPT-5 Mini' },
+  { id: 'openai/gpt-5.1-pro', name: 'GPT-5.1 Pro' },
+  { id: 'openai/gpt-5.2-pro', name: 'GPT-5.2 Pro' },
+  { id: 'xai/grok-4', name: 'Grok-4' },
+  { id: 'xai/grok-4.1-fast', name: 'Grok-4.1 Fast' }
 ];
 class ChatService {
   private sessionId: string;
