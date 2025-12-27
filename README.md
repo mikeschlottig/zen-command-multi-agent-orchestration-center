@@ -1,6 +1,6 @@
 # Zen Command - Multi-Agent Orchestration Center
 
-[![Deploy to Cloudflare][cloudflarebutton]]
+[![Deploy to Cloudflare][![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/mikeschlottig/zen-command-multi-agent-orchestration-center)]
 
 Zen Command is a state-of-the-art GUI dashboard and control plane for the Zen MCP multi-agent ecosystem. It transforms the command-line heavy experience of orchestrating multiple AI models into a sleek, visual, and interactive 'Mission Control' center.
 
@@ -125,7 +125,7 @@ bun run deploy
 
 Your app will be live at `https://{project-name}.{account_id}.workers.dev`.
 
-[![Deploy to Cloudflare][cloudflarebutton]]
+[![Deploy to Cloudflare][![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/mikeschlottig/zen-command-multi-agent-orchestration-center)]
 
 **Bindings**: Uses `CHAT_AGENT` (conversations) and `APP_CONTROLLER` (sessions). No changes needed to `wrangler.jsonc`.
 
