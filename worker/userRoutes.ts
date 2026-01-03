@@ -1,9 +1,8 @@
 import { Hono } from "hono";
 import { getAgentByName } from 'agents';
-import { ChatAgent } from './agent';
-import { API_RESPONSES } from './config';
+import { ChatAgent } from './agent';import { API_RESPONSES } from './config';
 import { Env, getAppController, registerSession, unregisterSession } from "./core-utils";
-
+import { getToolDefinitions } from './tools';
 /**
  * DO NOT MODIFY THIS FUNCTION. Only for your reference.
  */
@@ -28,10 +27,28 @@ export function coreRoutes(app: Hono<{ Bindings: Env }>) {
             error: API_RESPONSES.AGENT_ROUTING_FAILED 
         }, { status: 500 });
         }
-    });
-}
-
+    });}
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
+    /**
+     * List all available tools
+     * GET /api/tools
+     */
+    app.get('/api/tools', async (c) => {
+        try {
+            const definitions = await getToolDefinitions();
+            const tools = definitions.map(t => ({
+                id: t.function.name,
+                name: t.function.name,
+                description: t.function.description,
+                enabled: true
+            }));
+            return c.json({ success: true, data: tools });
+        } catch (error) {
+            console.error('Failed to list tools:', error);
+            return c.json({ success: false, error: 'Failed to retrieve tools' }, 500);
+        }
+    });
+
     // Add your routes here
     /**
      * List all chat sessions

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 export function useTheme() {
   // Default to dark theme as per blueprint
   const [isDark, setIsDark] = useState(() => {
