@@ -4,12 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Search, Trash2, Bot, Download, Filter, MessageSquare, Calendar } from 'lucide-react';
+import { Search, Trash2, Bot, Download, Calendar } from 'lucide-react';
 import { chatService } from '@/lib/chat';
 import type { SessionInfo } from '../../worker/types';
-import { formatDistanceToNow, format } from 'date-fns';
+import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -99,7 +100,7 @@ export function ArchivesPage() {
                           <Badge variant="outline" className="text-[9px] border-zinc-800 text-zinc-500">LOG</Badge>
                         </div>
                         <CardDescription className="text-[10px] flex items-center gap-1 mt-1">
-                          <Calendar className="w-3 h-3" /> {format(s.lastActive, 'MMM d, yyyy �� HH:mm')}
+                          <Calendar className="w-3 h-3" /> {format(s.lastActive, 'MMM d, yyyy HH:mm')}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="pt-2 mt-auto">
