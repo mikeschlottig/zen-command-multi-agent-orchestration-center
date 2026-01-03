@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { SendHorizonal, Loader, Bot, User } from 'lucide-react';
+import { SendHorizonal, Loader, Bot, User, ArrowDown, Command, Sparkles, RefreshCw } from 'lucide-react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { AgentStatePanel } from '@/components/zen/AgentStatePanel';
 import { MessageBubble } from '@/components/zen/MessageBubble';
 import { chatService } from '@/lib/chat';
@@ -12,6 +13,7 @@ import type { Message } from '../../worker/types';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { motion, AnimatePresence } from 'framer-motion';
 export function SessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
@@ -20,107 +22,136 @@ export function SessionPage() {
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentModel, setCurrentModel] = useState('google-ai-studio/gemini-2.5-flash');
+  const [currentModel, setCurrentModel] = useState('anthropic/claude-4-sonnet');
   const [streamingMessage, setStreamingMessage] = useState<Message | null>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const scrollToBottom = useCallback(() => {
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (scrollAreaRef.current) {
       const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
       if (viewport) {
-        setTimeout(() => {
-          viewport.scrollTop = viewport.scrollHeight;
-        }, 0);
+        viewport.scrollTo({ top: viewport.scrollHeight, behavior });
       }
     }
   }, []);
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const isAtBottom = target.scrollHeight - target.scrollTop <= target.clientHeight + 100;
+    setShowScrollButton(!isAtBottom);
+  }, []);
   useEffect(() => {
-    if (!sessionId) {
-      navigate('/');
-      return;
-    }
-    const loadSession = async () => {
+    if (!sessionId) return navigate('/');
+    const load = async () => {
       setIsLoading(true);
       chatService.switchSession(sessionId);
-      const response = await chatService.getMessages();
-      if (response.success && response.data) {
-        setMessages(response.data.messages);
-        setCurrentModel(response.data.model);
+      const res = await chatService.getMessages();
+      if (res.success && res.data) {
+        setMessages(res.data.messages);
+        setCurrentModel(res.data.model);
       } else {
-        toast.error("Failed to load session.", { description: "This session may not exist or an error occurred." });
+        toast.error("Mission not found");
         navigate('/');
       }
       setIsLoading(false);
+      setTimeout(() => scrollToBottom('auto'), 100);
     };
-    loadSession();
-  }, [sessionId, navigate]);
+    load();
+  }, [sessionId, navigate, scrollToBottom]);
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, streamingMessage, scrollToBottom]);
-  const handleSendMessage = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!input.trim() || isProcessing) return;
-    const userMessage: Message = {
-      id: crypto.randomUUID(),
-      role: 'user',
-      content: input.trim(),
-      timestamp: Date.now(),
-    };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    if (isProcessing) scrollToBottom();
+  }, [streamingMessage, isProcessing, scrollToBottom]);
+  const handleSendMessage = async (contentOverride?: string) => {
+    const text = contentOverride || input.trim();
+    if (!text || isProcessing) return;
+    const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text, timestamp: Date.now() };
+    setMessages(prev => [...prev, userMsg]);
+    if (!contentOverride) setInput('');
     setIsProcessing(true);
-    setStreamingMessage({
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: '',
-      timestamp: Date.now(),
-    });
-    await chatService.sendMessage(userMessage.content, currentModel, (chunk) => {
+    setStreamingMessage({ id: crypto.randomUUID(), role: 'assistant', content: '', timestamp: Date.now() });
+    await chatService.sendMessage(text, currentModel, (chunk) => {
       setStreamingMessage(prev => prev ? { ...prev, content: prev.content + chunk } : null);
     });
-    const finalState = await chatService.getMessages();
-    if (finalState.success && finalState.data) {
-        setMessages(finalState.data.messages);
-    }
+    const final = await chatService.getMessages();
+    if (final.success && final.data) setMessages(final.data.messages);
     setIsProcessing(false);
     setStreamingMessage(null);
   };
-  const handleModelChange = async (modelId: string) => {
-    setCurrentModel(modelId);
-    await chatService.updateModel(modelId);
-    toast.success(`Model switched to ${modelId}`);
+  const handleRegenerate = () => {
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+    if (lastUserMsg) handleSendMessage(lastUserMsg.content);
   };
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-      <div className="py-8 md:py-10 lg:py-12 h-full">
-        <ResizablePanelGroup 
-          direction={isMobile ? "vertical" : "horizontal"} 
-          className="h-full border border-zinc-800 rounded-lg shadow-2xl shadow-black/30"
-        >
-          <ResizablePanel defaultSize={isMobile ? 100 : 70} minSize={50}>
-            <div className="flex flex-col h-full bg-zinc-950/80 rounded-l-lg">
-              <header className="p-4 border-b border-zinc-800 flex items-center justify-between flex-shrink-0">
-                <h2 className="text-lg font-semibold text-zinc-200">Orchestrator</h2>
-                <div className="text-xs text-zinc-500">Session ID: {sessionId?.split('-')[0]}...</div>
+      <div className="py-6 h-full flex flex-col">
+        <ResizablePanelGroup direction={isMobile ? "vertical" : "horizontal"} className="flex-grow border border-zinc-800 rounded-xl overflow-hidden bg-zinc-950/50 backdrop-blur-xl shadow-2xl">
+          <ResizablePanel defaultSize={70} minSize={40}>
+            <div className="flex flex-col h-full relative">
+              <header className="h-14 border-b border-zinc-800 flex items-center justify-between px-6 bg-zinc-900/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <h2 className="text-sm font-semibold text-zinc-200 tracking-tight uppercase">Orchestrator Stream</h2>
+                </div>
+                <Badge variant="outline" className="font-mono text-[10px] border-zinc-700 text-zinc-500">
+                  ID: {sessionId?.slice(0, 8)}
+                </Badge>
               </header>
-              <div className="flex-grow overflow-hidden">
-                <ScrollArea className="h-full" ref={scrollAreaRef}>
-                  <div className="p-4 md:p-6 space-y-6">
+              <div className="flex-grow overflow-hidden relative">
+                <ScrollArea className="h-full" ref={scrollAreaRef} onScrollCapture={handleScroll}>
+                  <div className="p-6 space-y-8 max-w-4xl mx-auto">
                     {isLoading ? (
-                      <div className="space-y-6">
-                        <div className="flex items-start gap-3"><User className="w-6 h-6 rounded-full" /><Skeleton className="w-3/5 h-16" /></div>
-                        <div className="flex items-start gap-3 justify-end"><Skeleton className="w-4/5 h-24" /><Bot className="w-6 h-6 rounded-full" /></div>
+                      Array(3).fill(0).map((_, i) => (
+                        <div key={i} className="flex gap-4">
+                          <Skeleton className="w-8 h-8 rounded-full" />
+                          <Skeleton className="h-20 flex-grow rounded-xl" />
+                        </div>
+                      ))
+                    ) : messages.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-[400px] text-center space-y-6">
+                        <div className="p-4 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+                          <Sparkles className="w-8 h-8 text-indigo-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-medium text-zinc-200">Initialize Mission</h3>
+                          <p className="text-zinc-500 text-sm mt-1">Select a prompt or type your command below.</p>
+                        </div>
+                        <div className="flex flex-wrap justify-center gap-2 max-w-md">
+                          {["Review my code", "Debug this error", "Explain system design", "Audit security"].map(p => (
+                            <Button key={p} variant="outline" size="sm" className="bg-zinc-900/50 border-zinc-800 hover:border-indigo-500/50" onClick={() => setInput(p)}>
+                              {p}
+                            </Button>
+                          ))}
+                        </div>
                       </div>
                     ) : (
                       <>
-                        {messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)}
+                        {messages.map((m) => (
+                          <MessageBubble key={m.id} message={m} onRegenerate={m.role === 'assistant' ? handleRegenerate : undefined} />
+                        ))}
                         {streamingMessage && <MessageBubble message={streamingMessage} isStreaming />}
+                        {isProcessing && !streamingMessage && (
+                          <div className="flex gap-4 items-start">
+                            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center"><Bot className="w-4 h-4 text-indigo-400" /></div>
+                            <div className="flex gap-1 mt-3">
+                              {[0, 1, 2].map(i => <motion.div key={i} animate={{ opacity: [0.3, 1, 0.3] }} transition={{ repeat: Infinity, duration: 1, delay: i * 0.2 }} className="w-1.5 h-1.5 rounded-full bg-zinc-500" />)}
+                            </div>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
                 </ScrollArea>
+                <AnimatePresence>
+                  {showScrollButton && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute bottom-4 right-6 z-20">
+                      <Button size="icon" variant="secondary" className="rounded-full shadow-lg border border-zinc-700" onClick={() => scrollToBottom()}>
+                        <ArrowDown className="w-4 h-4" />
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-              <div className="p-4 border-t border-zinc-800 flex-shrink-0">
-                <form onSubmit={handleSendMessage} className="relative">
+              <div className="p-6 border-t border-zinc-800 bg-zinc-900/20">
+                <div className="max-w-4xl mx-auto relative">
                   <Textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -130,25 +161,29 @@ export function SessionPage() {
                         handleSendMessage();
                       }
                     }}
-                    placeholder="Send a command to your agent swarm..."
-                    className="w-full bg-zinc-900 border-zinc-700 rounded-lg pr-24 resize-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-zinc-950 transition-shadow"
-                    rows={1}
+                    placeholder="Command your swarm..."
+                    className="min-h-[60px] w-full bg-zinc-900/80 border-zinc-700 rounded-xl pr-32 resize-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
                   />
-                  <div className="absolute bottom-2.5 right-3 flex items-center gap-2">
-                    <Button type="submit" size="icon" disabled={isProcessing || !input.trim()} className="bg-indigo-600 hover:bg-indigo-700 text-white transition-transform hover:scale-105 active:scale-95">
-                      {isProcessing ? <Loader className="h-4 w-4 animate-spin" /> : <SendHorizonal className="h-4 w-4" />}
+                  <div className="absolute bottom-3 right-3 flex items-center gap-2">
+                    <Badge variant="outline" className="hidden md:flex items-center gap-1 text-[10px] text-zinc-500 border-zinc-800">
+                      <Command className="w-2.5 h-2.5" /> K
+                    </Badge>
+                    <Button size="icon" disabled={isProcessing || !input.trim()} onClick={() => handleSendMessage()} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+                      {isProcessing ? <Loader className="w-4 h-4 animate-spin" /> : <SendHorizonal className="w-4 h-4" />}
                     </Button>
                   </div>
-                </form>
-                <p className="text-xs text-zinc-600 mt-2 text-center">
-                  Press <kbd className="px-1.5 py-0.5 text-xs font-semibold text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-md">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 text-xs font-semibold text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-md">Shift + Enter</kbd> for a new line.
-                </p>
+                </div>
+                <div className="mt-3 flex justify-center gap-4 text-[10px] text-zinc-600 uppercase tracking-widest font-medium">
+                  <span>Shift + Enter for new line</span>
+                  <span className="w-1 h-1 rounded-full bg-zinc-800 mt-1" />
+                  <span>{input.length}/4000 characters</span>
+                </div>
               </div>
             </div>
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={isMobile ? 0 : 30} minSize={20} maxSize={40} className={isMobile ? 'hidden' : ''}>
-            <AgentStatePanel currentModel={currentModel} onModelChange={handleModelChange} />
+          <ResizablePanel defaultSize={30} minSize={20} maxSize={40} className={isMobile ? 'hidden' : ''}>
+            <AgentStatePanel currentModel={currentModel} onModelChange={(m) => { setCurrentModel(m); chatService.updateModel(m); }} />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

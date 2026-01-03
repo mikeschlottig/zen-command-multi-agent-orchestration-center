@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Command as CommandIcon, Home, HardDrive, Settings, PlusCircle, Moon, Sun, BrainCircuit } from 'lucide-react';
+import { Command as CommandIcon, Home, HardDrive, Settings, PlusCircle, Moon, Sun, BrainCircuit, Trash2 } from 'lucide-react';
 import {
   CommandDialog,
   CommandEmpty,
@@ -51,7 +51,7 @@ export function CommandPalette() {
         <CommandGroup heading="Actions">
           <CommandItem onSelect={() => runCommand(async () => {
             const res = await chatService.createSession();
-            if (res.success && res.data) navigate(`/session/${res.data.sessionId}`);
+            if (res.success) navigate(`/session/${res.data?.sessionId}`);
           })}>
             <PlusCircle className="mr-2 h-4 w-4 text-blue-400" />
             <span>New Mission</span>

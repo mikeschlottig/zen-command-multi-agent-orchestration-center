@@ -3,108 +3,101 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ModelSelector } from './ModelSelector';
 import { VisualContextGraph } from './VisualContextGraph';
-import { BrainCircuit, Zap, ShieldCheck, Network, Code, Users } from 'lucide-react';
+import { BrainCircuit, Zap, ShieldCheck, Network, Activity, Clock, MoreVertical, RefreshCw } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
+import { Button } from '../ui/button';
 import { motion } from 'framer-motion';
-interface AgentStatePanelProps {
-  currentModel: string;
-  onModelChange: (modelId: string) => void;
-}
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1 }
-};
-export function AgentStatePanel({ currentModel, onModelChange }: AgentStatePanelProps) {
-  const confidence = 85;
+import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
+const mockTrend = [
+  { val: 80 }, { val: 82 }, { val: 78 }, { val: 85 }, { val: 88 }, { val: 84 }, { val: 90 }
+];
+export function AgentStatePanel({ currentModel, onModelChange }: { currentModel: string, onModelChange: (m: string) => void }) {
   return (
-    <div className="h-full flex flex-col bg-zinc-900 border-l border-zinc-800 rounded-r-lg">
-      <header className="p-4 border-b border-zinc-800 flex-shrink-0">
-        <h2 className="text-lg font-semibold text-zinc-200">Mission Data</h2>
+    <div className="h-full flex flex-col bg-zinc-950/20 backdrop-blur-md border-l border-zinc-800">
+      <header className="h-14 border-b border-zinc-800 flex items-center justify-between px-4 bg-zinc-900/40">
+        <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Mission Intelligence</h2>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-500"><MoreVertical className="w-4 h-4" /></Button>
       </header>
       <ScrollArea className="flex-grow">
         <div className="p-4 space-y-6">
-          <Card className="bg-zinc-900/50 border-zinc-800 transition-transform hover:-translate-y-1 hover:shadow-glow">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2 text-zinc-300">
-                <BrainCircuit className="w-5 h-5 text-indigo-400" />
-                Active Model
+          <Card className="bg-zinc-900/40 border-zinc-800 shadow-inner">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                <BrainCircuit className="w-3 h-3 text-indigo-400" /> Active Core
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ModelSelector
-                currentModel={currentModel}
-                onModelChange={onModelChange}
-              />
+              <ModelSelector currentModel={currentModel} onModelChange={onModelChange} />
             </CardContent>
           </Card>
-          <Card className="bg-zinc-900/50 border-zinc-800 transition-transform hover:-translate-y-1 hover:shadow-glow">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2 text-zinc-300">
-                <Network className="w-5 h-5 text-teal-400" />
-                Swarm Topology
+          <Card className="bg-zinc-900/40 border-zinc-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                <ShieldCheck className="w-3 h-3 text-emerald-400" /> Confidence Vector
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <VisualContextGraph />
-            </CardContent>
-          </Card>
-          <Card className="bg-zinc-900/50 border-zinc-800 transition-transform hover:-translate-y-1 hover:shadow-glow">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2 text-zinc-300">
-                <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                Confidence Level
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4">
-                <div className="w-full bg-zinc-800 rounded-full h-2.5 overflow-hidden">
-                  <motion.div
-                    className="bg-emerald-500 h-2.5 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${confidence}%` }}
-                    transition={{ duration: 1, ease: "circOut" }}
-                  />
-                </div>
-                <span className="font-semibold text-emerald-400">{confidence}%</span>
+              <div className="flex items-end justify-between mb-2">
+                <span className="text-3xl font-bold text-emerald-400 tracking-tighter">94%</span>
+                <Badge variant="outline" className="text-[9px] border-emerald-500/20 text-emerald-500 bg-emerald-500/5">STABLE</Badge>
               </div>
-              <p className="text-xs text-zinc-500 mt-2">Agent confidence in current solution path.</p>
+              <div className="h-12 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={mockTrend}>
+                    <Line type="monotone" dataKey="val" stroke="#10b981" strokeWidth={2} dot={false} />
+                    <YAxis hide domain={[0, 100]} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
             </CardContent>
           </Card>
-          <Card className="bg-zinc-900/50 border-zinc-800 transition-transform hover:-translate-y-1 hover:shadow-glow">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2 text-zinc-300">
-                <Zap className="w-5 h-5 text-amber-400" />
-                Active Tools
+          <Card className="bg-zinc-900/40 border-zinc-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                <Activity className="w-3 h-3 text-amber-400" /> Activity Feed
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <motion.div 
-                className="flex flex-wrap gap-2"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                <motion.div variants={itemVariants}><Badge variant="outline" className="font-mono border-zinc-700"><Zap className="w-3 h-3 mr-1.5 text-amber-500" />clink</Badge></motion.div>
-                <motion.div variants={itemVariants}><Badge variant="outline" className="font-mono border-zinc-700"><BrainCircuit className="w-3 h-3 mr-1.5 text-indigo-500" />planner</Badge></motion.div>
-                <motion.div variants={itemVariants}><Badge variant="outline" className="font-mono border-zinc-700"><Code className="w-3 h-3 mr-1.5 text-sky-500" />codereview</Badge></motion.div>
-                <motion.div variants={itemVariants}><Badge variant="outline" className="font-mono border-zinc-700"><Users className="w-3 h-3 mr-1.5 text-emerald-500" />consensus</Badge></motion.div>
-              </motion.div>
+              <div className="space-y-4">
+                {[
+                  { icon: <Zap className="w-3 h-3" />, text: "clink executed", time: "2m ago", color: "text-amber-400" },
+                  { icon: <BrainCircuit className="w-3 h-3" />, text: "model switch: haiku", time: "5m ago", color: "text-indigo-400" },
+                  { icon: <Clock className="w-3 h-3" />, text: "session checkpoint", time: "12m ago", color: "text-zinc-500" }
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center justify-between text-[11px]">
+                    <div className="flex items-center gap-2">
+                      <div className={item.color}>{item.icon}</div>
+                      <span className="text-zinc-300">{item.text}</span>
+                    </div>
+                    <span className="text-zinc-600 font-mono">{item.time}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-zinc-900/40 border-zinc-800">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                <Network className="w-3 h-3 text-teal-400" /> Swarm Topology
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0 h-40">
+              <VisualContextGraph />
             </CardContent>
           </Card>
         </div>
       </ScrollArea>
-      <footer className="p-4 border-t border-zinc-800 text-center text-xs text-zinc-600 flex-shrink-0">
-        <p>AI requests are rate-limited across all user apps.</p>
-        <p className="mt-1">Zen MCP v1.0</p>
+      <footer className="p-4 border-t border-zinc-800 bg-zinc-900/40">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between text-[10px] text-zinc-500">
+            <span>Latency</span>
+            <span className="font-mono text-emerald-500">142ms</span>
+          </div>
+          <div className="flex items-center justify-between text-[10px] text-zinc-500">
+            <span>Uptime</span>
+            <span className="font-mono">99.9%</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
